@@ -4,10 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
+const session = require('express-session');
+
 const config = require('./config/database');
 
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const pagesRouter = require('./routes/pages');
+const adminPagesRouter = require('./routes/admin_pages');
 
 var app = express();
 
@@ -27,8 +30,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
 
-app.use('/', indexRouter);
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
+app.use('/', pagesRouter);
+app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

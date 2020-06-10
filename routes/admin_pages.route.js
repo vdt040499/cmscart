@@ -98,8 +98,8 @@ router.post('/reorder-pages', (req, res) => {
 });
 
 //GET edit page
-router.get('/edit-page/:slug', async(req, res) => {
-    const page = await Page.findOne({slug: req.params.slug});
+router.get('/edit-page/:id', async(req, res) => {
+    const page = await Page.findById(req.params.id);
     res.render('admin/edit_page', {
         title: page.title,
         slug: page.slug,
@@ -109,7 +109,7 @@ router.get('/edit-page/:slug', async(req, res) => {
 })
 
 //POST add page
-router.post('/edit-page/:slug', async (req, res) => {
+router.post('/edit-page/:id', async (req, res) => {
     req.checkBody('title', 'Title must a value.').notEmpty();
     req.checkBody('content', 'Content must have a value.').notEmpty();
 
@@ -117,7 +117,7 @@ router.post('/edit-page/:slug', async (req, res) => {
     var slug = req.body.slug.replace(/\s+/g, '-').toLowerCase();
     if(slug == '') slug = title.replace(/\s+/g, '-').toLowerCase();
     var content = req.body.content;
-    var id = req.body.id;
+    var id = req.params.id;
 
     var errors = req.validationErrors();
 
@@ -127,7 +127,8 @@ router.post('/edit-page/:slug', async (req, res) => {
             errors: errors,
             title: title,
             slug: slug,
-            content: content
+            content: content,
+            id: id
         });
     }else{
         const pageExist = await Page.findOne({slug: slug, _id: {'$ne':id}});
@@ -149,7 +150,7 @@ router.post('/edit-page/:slug', async (req, res) => {
                 if(err) return console.log(err);
 
                 req.flash('success', 'Page edited');
-                res.redirect('/admin/pages/edit-page/' + page.slug);
+                res.redirect('/admin/pages/edit-page/' + id);
             });
         }
         

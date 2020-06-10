@@ -3,7 +3,7 @@ const router = express.Router();
 
 const Category = require('../models/category.model');
 
-//GET Admin pages
+//GET Admin categories
 router.get('/', async(req, res) => {
     const categories = await Category.find();
     res.render('admin/categories', {
@@ -11,7 +11,7 @@ router.get('/', async(req, res) => {
     });
 });
 
-//GET add page
+//GET add cate
 router.get('/add-category', (req, res) => {
     var title = "";
 
@@ -20,7 +20,7 @@ router.get('/add-category', (req, res) => {
     });
 });
 
-//POST add page
+//POST add cate
 router.post('/add-category', async (req, res) => {
     req.checkBody('title', 'Title must a value.').notEmpty();
 
@@ -61,7 +61,7 @@ router.post('/add-category', async (req, res) => {
     }    
 });
 
-//GET edit page
+//GET edit cate
 router.get('/edit-category/:id', async(req, res) => {
     const category = await Category.findById(req.params.id);
     res.render('admin/edit_category', {
@@ -70,7 +70,7 @@ router.get('/edit-category/:id', async(req, res) => {
     });
 });
 
-//POST add page
+//POST edit cate
 router.post('/edit-category/:id', async (req, res) => {
     req.checkBody('title', 'Title must a value.').notEmpty();
 
@@ -110,13 +110,13 @@ router.post('/edit-category/:id', async (req, res) => {
     }    
 });
 
-//GET delete page
-router.get('/delete-page/:id', (req, res) => {
-    Page.findByIdAndRemove(req.params.id, (err) => {
+//GET delete cate
+router.get('/delete-category/:id', (req, res) => {
+    Category.findByIdAndRemove(req.params.id, (err) => {
         if(err) return console.log(err);
 
-        req.flash('success', 'Page deleted');
-        res.redirect('/admin/pages');
+        req.flash('success', 'Category deleted');
+        res.redirect('/admin/categories');
     });
 });
 module.exports = router;

@@ -3,8 +3,11 @@ const router = express.Router();
 
 const Page = require('../models/page.model');
 
-router.get('/', (req, res) => {
-    res.send('admin area');
+router.get('/', async(req, res) => {
+    const pages = await Page.find();
+    res.render('admin/pages', {
+        pages: pages
+    });
 });
 
 router.get('/add-page', (req, res) => {
@@ -53,7 +56,7 @@ router.post('/add-page', async (req, res) => {
                 title: title,
                 slug: slug,
                 content: content,
-                sorting: 0
+                sorting: 100
             });
 
             await page.save((err) => {

@@ -16,16 +16,16 @@
         </tr>
     </thead>
     <tbody>
-        <% products.forEach(function(products) {%>
-        <tr id="id_<%= product.title %>" class="<%= page.slug %>">
+        <% products.forEach(function(product) {%>
+        <tr>
             <td><%= product.title %></td>
             <td>$<%= parseFloat(product.price).toFixed(2) %></td>
             <td><%= product.category %></td>
             <td>
                 <% if (product.image == "") { %>
-                    <img src="/images/noimage.png">
+                    <img id="noimage" src="/images/noimage.png">
                 <% } else { %>
-                    <img src="/product_images/<%= product._id %>/<%= product._image %>">
+                    <img id="noimage" src="/product_images/<%= product._id %>/<%= product.image %>">
                 <% } %>    
             </td>
             <td><a href="/admin/products/edit-product/<%= product._id %>">Edit</a></td>

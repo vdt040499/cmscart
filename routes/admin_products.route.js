@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp'); //0.5.1
 const fs = require('fs-extra');
 const resizeImg = require('resize-img');
 
@@ -8,8 +8,11 @@ const Product = require('../models/product.model');
 const Category = require('../models/category.model')
 //GET Admin Products 
 router.get('/', async(req, res) => {
-    var count = Product.count();
-
+    var count;
+    Product.count((e, c) => {
+        console.log(c);
+        count = c;
+    });
     const products = await Product.find();
 
     res.render('admin/products', {
@@ -18,65 +21,105 @@ router.get('/', async(req, res) => {
     });
 });
 
-//GET add page
-router.get('/add-page', (req, res) => {
+//GET add product
+router.get('/add-product', async(req, res) => {
     var title = "";
-    var slug = "";
-    var content = "";
+    var desc = "";
+    var price = "";
 
-    res.render('admin/add_page', {
+    const categories = await Category.find();
+
+    res.render('admin/add_product', {
         title: title,
-        slug: slug,
-        content: content
+        desc: desc,
+        categories: categories,
+        price: price
     });
 });
 
-//POST add page
-router.post('/add-page', async (req, res) => {
+//POST add product
+router.post('/add-product', async(req, res) => {
+    
+    if(!req.files){ imageFile =""; }
+    if(req.files){
+    var imageFile = typeof(req.files.image) !== "undefined" ? req.files.image.name : "";
+    }
+    
     req.checkBody('title', 'Title must a value.').notEmpty();
-    req.checkBody('content', 'Content must have a value.').notEmpty();
+    req.checkBody('desc', 'Description must have a value.').notEmpty();
+    req.checkBody('price', 'Price must have a value.').isDecimal();
+    req.checkBody('image', 'You must upload an image').isImage(imageFile);
 
     var title = req.body.title;
-    var slug = req.body.slug.replace(/\s+/g, '-').toLowerCase();
-    if(slug == '') slug = title.replace(/\s+/g, '-').toLowerCase();
-    var content = req.body.content;
+    var slug = title.replace(/\s+/g, '-').toLowerCase();
+    var desc = req.body.desc;
+    var price = req.body.price;
+    var category = req.body.category;
 
     var errors = req.validationErrors();
 
     if(errors) {
-        console.log(errors);
-        res.render('admin/add_page', {
+        const categories = await Category.find();
+        res.render('admin/add_product', {
             errors: errors,
             title: title,
-            slug: slug,
-            content: content
+            desc: desc,
+            price: price,
+            categories: categories
         });
     }else{
-        const pageExist = await Page.findOne({slug: slug});
-        console.log(pageExist);
-        if(pageExist){
-            req.flash('danger', 'Page slug exists, choose another.');
-            res.render('admin/add_page', {
+        const productExist = await Product.findOne({slug: slug});
+        const categories = await Category.find();
+        if(productExist){
+            req.flash('danger', 'Product title exists, choose another.');
+            res.render('admin/add_product', {
                 title: title,
-                slug: slug,
-                content: content
+                desc: desc,
+                price: price,
+                categories: categories
             });
         }else{
-            const page = new Page({
+            var price2 = parseFloat(price).toFixed(2);
+
+            const product = new Product({
                 title: title,
                 slug: slug,
-                content: content,
-                sorting: 100
+                desc: desc,
+                price: price2,
+                category: category,
+                image: imageFile
             });
 
-            await page.save((err) => {
-               if(err) {
-                   console.log(err);
-               }     
+            product.save(function (err) {
+                if (err)
+                    return console.log(err);
+
+                mkdirp('public/product_images/' + product._id, function (err) {
+                    return console.log(err);
+                });
+
+                mkdirp('public/product_images/' + product._id + '/gallery', function (err) {
+                    return console.log(err);
+                });
+
+                mkdirp('public/product_images/' + product._id + '/gallery/thumbs', function (err) {
+                    return console.log(err);
+                });
+
+                if (imageFile != "") {
+                    var productImage = req.files.image;
+                    var path = 'public/product_images/' + product._id + '/' + imageFile;
+
+                    productImage.mv(path, function (err) {
+                        return console.log(err);
+                    });
+                }
+
+                req.flash('success', 'Product added!');
+                res.redirect('/admin/products');
             });
 
-            req.flash('success', 'Page added!');
-            res.redirect('/admin/pages');
+            
         }
         
     }    

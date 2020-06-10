@@ -47,6 +47,47 @@ app.use(validator());
 
 app.locals.errors = null;
 
+app.use(validator({
+  errorFormatter: function (param, msg, value) {
+      var namespace = param.split('.')
+              , root = namespace.shift()
+              , formParam = root;
+
+      while (namespace.length) {
+          formParam += '[' + namespace.shift() + ']';
+      }
+      return {
+          param: formParam,
+          msg: msg,
+          value: value
+      };
+  },
+  customValidators: {
+      isImage: function (value, filename) {
+          var extension = (path.extname(filename)).toLowerCase();
+          switch (extension) {
+              case '.jpg':
+                  return '.jpg';
+              case '.jpeg':
+                  return '.jpeg';
+              case '.png':
+                  return '.png';
+              case '':
+                  return '.jpg';
+              default:
+                  return false;
+          }
+      }
+  }
+}));
+
+// Express Messages middleware
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
   res.locals.messages = require('express-messages')(req, res);

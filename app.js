@@ -5,12 +5,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const flash = require('connect-flash');
+const validator = require('express-validator');
 
 const config = require('./config/database');
 
-var usersRouter = require('./routes/users');
-const pagesRouter = require('./routes/pages');
-const adminPagesRouter = require('./routes/admin_pages');
+var usersRouter = require('./routes/users.route');
+const pagesRouter = require('./routes/pages.route');
+const adminPagesRouter = require('./routes/admin_pages.route');
 
 var app = express();
 
@@ -36,6 +38,10 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: true }
 }));
+app.use(flash());
+app.use(validator());
+
+app.locals.errors = null;
 
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {

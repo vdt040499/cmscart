@@ -4,7 +4,7 @@ const router = express.Router();
 const Page = require('../models/page.model');
 
 router.get('/', async(req, res) => {
-    const pages = await Page.find();
+    const pages = await Page.find().sort({sorting: 1});
     res.render('admin/pages', {
         pages: pages
     });
@@ -72,4 +72,25 @@ router.post('/add-page', async (req, res) => {
     }    
 });
 
+//POST reorder pages
+router.post('/reorder-pages', (req, res) => {
+    var ids = req.body['id[]'];
+
+    var count  = 0;
+
+    for(let i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        count++;
+
+        (function(count){
+            Page.findById(id, (err, page) => {
+                page.sorting = count;
+                page.save((err) => {
+                    if(err)
+                        return console.log(err);
+                });
+            });
+        })(count);
+    }
+});
 module.exports = router;

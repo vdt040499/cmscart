@@ -1,0 +1,12 @@
+<% include ../partials/admin-header %>
+    <h5 class="page-title mt-2">Add a category</h5>
+    <a class="btn btn-primary mb-3" href="/admin/categories">Back to all categories</a>
+
+    <form action="/admin/categories/add-category" method="POST">    
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" type="text" id="title" name="title" value="<%= title %>" placeholder="Title">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+<% include ../partials/admin-footer %>

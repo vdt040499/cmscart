@@ -10,10 +10,10 @@ const validator = require('express-validator');
 
 const config = require('./config/database');
 
-var usersRouter = require('./routes/users.route');
+const usersRouter = require('./routes/users.route');
 const pagesRouter = require('./routes/pages.route');
 const adminPagesRouter = require('./routes/admin_pages.route');
-
+const adminCatesRouter = require('./routes/admin_categories.route');
 var app = express();
 
 //Connect to MongoDB
@@ -52,6 +52,7 @@ app.use(function (req, res, next) {
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);
+app.use('/admin/categories', adminCatesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -3,6 +3,7 @@ const router = express.Router();
 
 const Page = require('../models/page.model');
 
+//GET Admin pages
 router.get('/', async(req, res) => {
     const pages = await Page.find().sort({sorting: 1});
     res.render('admin/pages', {
@@ -10,6 +11,7 @@ router.get('/', async(req, res) => {
     });
 });
 
+//GET add page
 router.get('/add-page', (req, res) => {
     var title = "";
     var slug = "";
@@ -22,6 +24,7 @@ router.get('/add-page', (req, res) => {
     });
 });
 
+//POST add page
 router.post('/add-page', async (req, res) => {
     req.checkBody('title', 'Title must a value.').notEmpty();
     req.checkBody('content', 'Content must have a value.').notEmpty();
@@ -92,5 +95,64 @@ router.post('/reorder-pages', (req, res) => {
             });
         })(count);
     }
+});
+
+//GET edit page
+router.get('/edit-page/:slug', async(req, res) => {
+    const page = await Page.findOne({slug: req.params.slug});
+    res.render('admin/edit_page', {
+        title: page.title,
+        slug: page.slug,
+        content: page.content,
+        id: page._id
+    });
+})
+
+//POST add page
+router.post('/edit-page/:slug', async (req, res) => {
+    req.checkBody('title', 'Title must a value.').notEmpty();
+    req.checkBody('content', 'Content must have a value.').notEmpty();
+
+    var title = req.body.title;
+    var slug = req.body.slug.replace(/\s+/g, '-').toLowerCase();
+    if(slug == '') slug = title.replace(/\s+/g, '-').toLowerCase();
+    var content = req.body.content;
+    var id = req.body.id;
+
+    var errors = req.validationErrors();
+
+    if(errors) {
+        console.log(errors);
+        res.render('admin/edit_page', {
+            errors: errors,
+            title: title,
+            slug: slug,
+            content: content
+        });
+    }else{
+        const pageExist = await Page.findOne({slug: slug, _id: {'$ne':id}});
+        if(pageExist){
+            req.flash('danger', 'Page slug exists, choose another.');
+            res.render('admin/edit_page', {
+                title: title,
+                slug: slug,
+                content: content,
+                id: id
+            });
+        }else{
+            const page = await Page.findById(id);
+            page.title = title;
+            page.slug = slug;
+            page.content = content;
+            
+            page.save((err) => {
+                if(err) return console.log(err);
+
+                req.flash('success', 'Page edited');
+                res.redirect('/admin/pages/edit-page/' + page.slug);
+            });
+        }
+        
+    }    
 });
 module.exports = router;

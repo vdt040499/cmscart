@@ -1,0 +1,22 @@
+<% include ../partials/admin-header %>
+    <h5 class="page-title mt-2">Edit a page</h5>
+    <a class="btn btn-primary mb-3" href="/admin/pages">Back to all pages</a>
+
+    <form action="/admin/pages/edit-page/<%= slug %>" method="POST">    
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" type="text" id="title" name="title" value="<%= title %>" placeholder="Title">
+        </div>
+        <div class="form-group">
+            <label for="slug">Slug</label>
+            <input class="form-control" type="text" id="slug" name="slug" value="<%= slug %>" placeholder="Slug">
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <input class="form-control" type="text" id="content" name="content" value="<%= content %>" placeholder="Content">
+        </div>
+        
+        <input type="hidden" name="id" value="<%= id %>">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+<% include ../partials/admin-footer %>

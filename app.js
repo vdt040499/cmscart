@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('connect-flash');
 const validator = require('express-validator');
+const fileUpload = require('express-fileupload');
 
 const config = require('./config/database');
 
@@ -14,6 +15,8 @@ const usersRouter = require('./routes/users.route');
 const pagesRouter = require('./routes/pages.route');
 const adminPagesRouter = require('./routes/admin_pages.route');
 const adminCatesRouter = require('./routes/admin_categories.route');
+const adminProductsRouter = require('./routes/admin_products.route');
+
 var app = express();
 
 //Connect to MongoDB
@@ -28,6 +31,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
+app.use(fileUpload());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -53,6 +57,7 @@ app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);
 app.use('/admin/categories', adminCatesRouter);
+app.use('/admin/products', adminProductsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

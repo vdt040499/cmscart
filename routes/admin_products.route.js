@@ -166,7 +166,69 @@ router.post('/edit-product/:id', async(req, res) => {
     var imageFile = typeof(req.files.image) !== "undefined" ? req.files.image.name : "";
     }
     
-    req.checkBody('title', 'Title must a value.').notEmpty();
+    // req.checkBody('title', 'Title must a value.').notEmpty();
+    // req.checkBody('desc', 'Description must have a value.').notEmpty();
+    // req.checkBody('price', 'Price must have a value.').isDecimal();
+    // req.checkBody('image', 'You must upload an image').isImage(imageFile);
+
+    // var title = req.body.title;
+    // var slug = title.replace(/\s+/g, '-').toLowerCase();
+    // var desc = req.body.desc;
+    // var price = req.body.price;
+    // var category = req.body.category;
+    // var pimage = req.body.pimage;
+    // var id = req.params.id;
+
+    // var errors = req.validationErrors();
+
+    // if(errors) {
+    //     req.session.errors = errors;
+    //     res.redirect('/admin/products/edit-product/' + id);
+    // }else{
+    //     const existProduct  = await Product.findOne({slug: slug, _id: {'$ne': id}});
+    //     if(existProduct) {
+    //         req.flash('danger', 'Product title exists, choose another.');
+    //         res.redirect('/admin/products/edit-product/' + id)
+    //     }else{
+    //         const product = await Product.findById(id);
+            
+    //         product.title = title;
+    //         product.slug = slug;
+    //         product.desc = desc;
+    //         product.price = parseFloat(price).toFixed(2);
+    //         product.category = category;
+    //         if (imageFile != "") {
+    //             product.image = imageFile;
+    //         }
+
+    //         product.save((err) => {
+    //             if(err) {
+    //                 console.log(err);
+    //             }
+
+    //             if(imageFile != "") {
+    //                 console.log('public/product_images' + id + '/' + pimage);
+    //                 if(pimage != "") {
+    //                     fs.remove('public/product_images' + id + '/' + pimage, (err) => {
+    //                         if(err) console.log(err + '1'); 
+    //                     });
+    //                 } 
+
+    //                 var productImage = req.files.image;
+    //                 var path = 'public/product_images/' + id + '/' + imageFile;
+
+    //                 productImage.mv(path, (err) => {
+    //                     return console.log(err + '2');
+    //                 });
+    //             }
+
+    //             req.flash('success', 'Product edited');
+    //             res.redirect('/admin/products/edit-product/' + id);
+    //         });
+    //     }
+    // }
+
+    req.checkBody('title', 'Title must have a value.').notEmpty();
     req.checkBody('desc', 'Description must have a value.').notEmpty();
     req.checkBody('price', 'Price must have a value.').isDecimal();
     req.checkBody('image', 'You must upload an image').isImage(imageFile);
@@ -181,50 +243,59 @@ router.post('/edit-product/:id', async(req, res) => {
 
     var errors = req.validationErrors();
 
-    if(errors) {
+    if (errors) {
         req.session.errors = errors;
         res.redirect('/admin/products/edit-product/' + id);
-    }else{
-        const existProduct  = await Product.findOne({slug: slug, _id: {'$ne': id}});
-        if(existProduct) {
-            req.flash('danger', 'Product title exists, choose another.');
-            res.redirect('/admin/products/edit-product/' + id)
-        }else{
-            const product = await Product.findById(id);
-            
-            product.title = title;
-            product.slug = slug;
-            product.desc = desc;
-            product.price = parseFloat(price).toFixed(2);
-            product.category = category;
-            if (imageFile != "") {
-                product.image = imageFile;
-            }
+    } else {
+        Product.findOne({slug: slug, _id: {'$ne': id}}, function (err, p) {
+            if (err)
+                console.log(err);
 
-            product.save((err) => {
-                if(err) {
-                    console.log(err);
-                }
-
-                if(imageFile != "") {
-                    if(pimage != "") {
-                        fs.remove('public/product_images' + id + '/' + pimage, (err) => {
-                            if(err) console.log(err); 
-                        });
-                    } 
-
-                    var productImage = req.files.image;
-                    var path = 'public/product_images/' + id + '/' + imageFile;
-
-                    productImage.mv(path, (err) => {
-                        return console.log(err);
-                    });
-                }
-
-                req.flash('success', 'Product edited');
+            if (p) {
+                req.flash('danger', 'Product title exists, choose another.');
                 res.redirect('/admin/products/edit-product/' + id);
-            });
-        }
+            } else {
+                Product.findById(id, function (err, p) {
+                    if (err)
+                        console.log(err);
+
+                    p.title = title;
+                    p.slug = slug;
+                    p.desc = desc;
+                    p.price = parseFloat(price).toFixed(2);
+                    p.category = category;
+                    if (imageFile != "") {
+                        p.image = imageFile;
+                    }
+
+                    p.save(function (err) {
+                        if (err)
+                            console.log(err);
+
+                        if (imageFile != "") {
+                            if (pimage != "") {
+                                fs.remove('public/product_images/' + id + '/' + pimage, function (err) {
+                                    if (err)
+                                        console.log(err);
+                                });
+                            }
+
+                            var productImage = req.files.image;
+                            var path = 'public/product_images/' + id + '/' + imageFile;
+
+                            productImage.mv(path, function (err) {
+                                return console.log(err);
+                            });
+
+                        }
+
+                        req.flash('success', 'Product edited!');
+                        res.redirect('/admin/products/edit-product/' + id);
+                    });
+
+                });
+            }
+        });
     }
 });
 

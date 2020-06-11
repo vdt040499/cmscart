@@ -11,11 +11,24 @@ const fileUpload = require('express-fileupload');
 
 const config = require('./config/database');
 
+//Get routes
 const usersRouter = require('./routes/users.route');
 const pagesRouter = require('./routes/pages.route');
 const adminPagesRouter = require('./routes/admin_pages.route');
 const adminCatesRouter = require('./routes/admin_categories.route');
 const adminProductsRouter = require('./routes/admin_products.route');
+
+//Get Page models
+const Page = require('./models/page.model');
+
+//Get all pages to pass header.ejs
+Page.find().sort({sorting: 1}).exec(function (err, pages) {
+  if(err) {
+    console.log(err);
+  } else {
+    app.locals.pages = pages;
+  }
+});
 
 var app = express();
 
@@ -30,11 +43,14 @@ db.once('open', function() {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+//Default  middleware
 app.use(logger('dev'));
 app.use(fileUpload());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+//Set public folder
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: 'keyboard cat',
@@ -42,11 +58,14 @@ app.use(session({
   saveUninitialized: true,
   // cookie: { secure: true }
 }));
-app.use(flash());
-app.use(validator());
 
+// app.use(flash());
+// app.use(validator());
+
+//Set global errors variable
 app.locals.errors = null;
 
+//Express validator middleware
 app.use(validator({
   errorFormatter: function (param, msg, value) {
       var namespace = param.split('.')
@@ -88,12 +107,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use(require('connect-flash')());
-app.use(function (req, res, next) {
-  res.locals.messages = require('express-messages')(req, res);
-  next();
-});
-
+//Routes
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);

@@ -125,86 +125,107 @@ router.post('/add-product', async(req, res) => {
     }    
 });
 
-//POST reorder pages
-router.post('/reorder-pages', (req, res) => {
-    var ids = req.body['id[]'];
+//GET edit product
+router.get('/edit-product/:id', async(req, res) => {
+    var errors;
 
-    var count  = 0;
+    if(req.session.errors) errors = req.session.errors;
+    req.session.errors = null;
+    
+    const product = await Product.findById(req.params.id);
+    const categories = await Category.find();
 
-    for(let i = 0; i < ids.length; i++) {
-        var id = ids[i];
-        count++;
+    var  galleryDir = 'public/product_images/' + product._id + '/gallery';
+    var galleryImages = null;
 
-        (function(count){
-            Page.findById(id, (err, page) => {
-                page.sorting = count;
-                page.save((err) => {
-                    if(err)
-                        return console.log(err);
-                });
+    fs.readdir(galleryDir, (err, files) => {
+        if(err) {
+            console.log(err);
+        }else{
+            galleryImages = files;
+
+            res.render('admin/edit_product', {
+                errors: errors,
+                title: product.title,
+                desc: product.desc,
+                price: product.price,
+                categories: categories,
+                category: product.category.replace(/\s+/g,'-').toLowerCase(),
+                image: product.image,
+                galleryImages: galleryImages,
+                id: product._id
             });
-        })(count);
-    }
+        }
+    });
 });
 
-//GET edit page
-router.get('/edit-page/:id', async(req, res) => {
-    const page = await Page.findById(req.params.id);
-    res.render('admin/edit_page', {
-        title: page.title,
-        slug: page.slug,
-        content: page.content,
-        id: page._id
-    });
-})
-
-//POST add page
-router.post('/edit-page/:id', async (req, res) => {
+//POST edit product
+router.post('/edit-product/:id', async(req, res) => {
+    if(!req.files){ imageFile =""; }
+    if(req.files){
+    var imageFile = typeof(req.files.image) !== "undefined" ? req.files.image.name : "";
+    }
+    
     req.checkBody('title', 'Title must a value.').notEmpty();
-    req.checkBody('content', 'Content must have a value.').notEmpty();
+    req.checkBody('desc', 'Description must have a value.').notEmpty();
+    req.checkBody('price', 'Price must have a value.').isDecimal();
+    req.checkBody('image', 'You must upload an image').isImage(imageFile);
 
     var title = req.body.title;
-    var slug = req.body.slug.replace(/\s+/g, '-').toLowerCase();
-    if(slug == '') slug = title.replace(/\s+/g, '-').toLowerCase();
-    var content = req.body.content;
+    var slug = title.replace(/\s+/g, '-').toLowerCase();
+    var desc = req.body.desc;
+    var price = req.body.price;
+    var category = req.body.category;
+    var pimage = req.body.pimage;
     var id = req.params.id;
 
     var errors = req.validationErrors();
 
     if(errors) {
-        console.log(errors);
-        res.render('admin/edit_page', {
-            errors: errors,
-            title: title,
-            slug: slug,
-            content: content,
-            id: id
-        });
+        req.session.errors = errors;
+        res.redirect('/admin/products/edit-product/' + id);
     }else{
-        const pageExist = await Page.findOne({slug: slug, _id: {'$ne':id}});
-        if(pageExist){
-            req.flash('danger', 'Page slug exists, choose another.');
-            res.render('admin/edit_page', {
-                title: title,
-                slug: slug,
-                content: content,
-                id: id
-            });
+        const existProduct  = await Product.findOne({slug: slug, _id: {'$ne': id}});
+        if(existProduct) {
+            req.flash('danger', 'Product title exists, choose another.');
+            res.redirect('/admin/products/edit-product/' + id)
         }else{
-            const page = await Page.findById(id);
-            page.title = title;
-            page.slug = slug;
-            page.content = content;
+            const product = await Product.findById(id);
             
-            page.save((err) => {
-                if(err) return console.log(err);
+            product.title = title;
+            product.slug = slug;
+            product.desc = desc;
+            product.price = parseFloat(price).toFixed(2);
+            product.category = category;
+            if (imageFile != "") {
+                product.image = imageFile;
+            }
 
-                req.flash('success', 'Page edited');
-                res.redirect('/admin/pages/edit-page/' + id);
+            product.save((err) => {
+                if(err) {
+                    console.log(err);
+                }
+
+                if(imageFile != "") {
+                    if(pimage != "") {
+                        fs.remove('public/product_images' + id + '/' + pimage, (err) => {
+                            if(err) console.log(err); 
+                        });
+                    } 
+
+                    var productImage = req.files.image;
+                    var path = 'public/product_images/' + id + '/' + imageFile;
+
+                    productImage.mv(path, (err) => {
+                        return console.log(err);
+                    });
+                }
+
+                req.flash('success', 'Product edited');
+                res.redirect('/admin/products/edit-product/' + id);
             });
         }
-        
-    }    
+    }
 });
 
 //GET delete page

@@ -30,4 +30,17 @@
     </nav>
     <div class="container">
         <%- messages('my_message_template', locals) %>
+
+        <div class="row mt-4">
+            <div class="col-xs-12 col-md-3">
+                <h3>Categories</h3>
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="/products">All products</a></li>
+                    <% categories.forEach((cat) => { %>
+                        <li class="list-group-item"><a href="/products/<%= cat.slug %>"><%= cat.title %></a></li>
+                    <% }); %>
+                </ul>
+            </div>
+            <div class="col-xs-12"></div>
+            <div class="col-xs-12 col-md-8">
     

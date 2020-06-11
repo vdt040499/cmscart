@@ -18,7 +18,9 @@ const adminPagesRouter = require('./routes/admin_pages.route');
 const adminCatesRouter = require('./routes/admin_categories.route');
 const adminProductsRouter = require('./routes/admin_products.route');
 
-//Get Page models
+var app = express();
+
+//Get Page model
 const Page = require('./models/page.model');
 
 //Get all pages to pass header.ejs
@@ -30,7 +32,17 @@ Page.find().sort({sorting: 1}).exec(function (err, pages) {
   }
 });
 
-var app = express();
+//Get Category model
+const Category = require('./models/category.model');
+
+//Get all categories to pass header.ejs
+Category.find((err, categories) => {
+  if(err) {
+    console.log(err);
+  } else {
+    app.locals.categories = categories;
+  }
+});
 
 //Connect to MongoDB
 mongoose.connect(config.database);

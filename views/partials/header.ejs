@@ -26,6 +26,17 @@
                     <% } %>
                 <% }); %>
             </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart/checkout">My Cart(
+                        <% if (typeof cart !== "undefined") { %>
+                            <%= cart.length %>
+                        <% } else { %>
+                            0
+                        <% } %>    
+                    )</a>
+                </li>
+            </ul>
         </div>
     </nav>
     <div class="container">

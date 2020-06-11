@@ -112,18 +112,25 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.get('*', (req, res, next) => {
+  res.locals.cart = req.session.cart;
+  next();
+});
+
 //Set routes
 const usersRouter = require('./routes/users.route');
 const pagesRouter = require('./routes/pages.route');
 const productsRouter = require('./routes/products.route');
+const cartRouter = require('./routes/cart.route');
 const adminPagesRouter = require('./routes/admin_pages.route');
 const adminCatesRouter = require('./routes/admin_categories.route');
 const adminProductsRouter = require('./routes/admin_products.route');
 
 app.use('/products', productsRouter);
 app.use('/', pagesRouter);
-app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);
+app.use('/cart', cartRouter);
+app.use('/admin/pages', adminPagesRouter);
 app.use('/admin/categories', adminCatesRouter);
 app.use('/admin/products', adminProductsRouter);
 

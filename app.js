@@ -11,13 +11,6 @@ const fileUpload = require('express-fileupload');
 
 const config = require('./config/database');
 
-//Get routes
-const usersRouter = require('./routes/users.route');
-const pagesRouter = require('./routes/pages.route');
-const adminPagesRouter = require('./routes/admin_pages.route');
-const adminCatesRouter = require('./routes/admin_categories.route');
-const adminProductsRouter = require('./routes/admin_products.route');
-
 var app = express();
 
 //Get Page model
@@ -119,7 +112,15 @@ app.use(function (req, res, next) {
   next();
 });
 
-//Routes
+//Set routes
+const usersRouter = require('./routes/users.route');
+const pagesRouter = require('./routes/pages.route');
+const productsRouter = require('./routes/products.route');
+const adminPagesRouter = require('./routes/admin_pages.route');
+const adminCatesRouter = require('./routes/admin_categories.route');
+const adminProductsRouter = require('./routes/admin_products.route');
+
+app.use('/products', productsRouter);
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/users', usersRouter);

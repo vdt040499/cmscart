@@ -8,6 +8,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const validator = require('express-validator');
 const fileUpload = require('express-fileupload');
+const passport = require('passport');
 
 const config = require('./config/database');
 
@@ -112,8 +113,16 @@ app.use(function (req, res, next) {
   next();
 });
 
+//Passport config
+require('./config/passport')(passport);
+
+//Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get('*', (req, res, next) => {
   res.locals.cart = req.session.cart;
+  res.locals.user = req.user || null;
   next();
 });
 
@@ -126,13 +135,13 @@ const adminPagesRouter = require('./routes/admin_pages.route');
 const adminCatesRouter = require('./routes/admin_categories.route');
 const adminProductsRouter = require('./routes/admin_products.route');
 
-app.use('/products', productsRouter);
-app.use('/', pagesRouter);
-app.use('/users', usersRouter);
-app.use('/cart', cartRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/admin/categories', adminCatesRouter);
 app.use('/admin/products', adminProductsRouter);
+app.use('/products', productsRouter);
+app.use('/users', usersRouter);
+app.use('/cart', cartRouter);
+app.use('/', pagesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

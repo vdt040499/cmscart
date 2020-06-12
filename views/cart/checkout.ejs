@@ -34,15 +34,23 @@
 </tr>
 <tr>
     <td colspan="5" align="right">
-        <a class="btn btn-danger" href="/cart/clear">Clear cart</a>
+        <a class="btn btn-danger clearcart" href="/cart/clear">Clear cart</a>
     </td>
     <td colspan="5" align="right">
-        <a class="btn btn-primary" href="#">Buy now</a>
+        <a class="btn btn-primary buynow" href="#">Buy now</a>
     </td>
 </tr>
 </table>
 <% } else { %>
 <h3 class="text-center">Your cart is empty</h3>
 <% } %>
+
+<script>
+    $(function() {
+        $('a.clearcart').on('click', function() {
+        if(!confirm('Confirm deletion')) return false; 
+    });
+    });
+</script>
 
 <% include ../partials/footer %>

@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs-extra');
+const auth = require('../config/auth');
+const isUser = auth.isUser;
 
 const Product = require('../models/product.model');
 const Category = require('../models/category.model');
 
 //Get all products
-router.get('/', function(req, res) {
+router.get('/', isUser, function(req, res) {
     Product.find((err, products) => {
         if(err) {
             console.log(err);

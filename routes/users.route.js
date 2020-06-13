@@ -31,6 +31,7 @@ router.post('/register', (req, res) => {
   if(errors) {
     res.render('user/register', {
       errors: errors,
+      user: null,
       title: 'Register'
     });
   } else {
@@ -84,6 +85,15 @@ router.post('/login', (req, res, next) => {
     failureRedirect: '/users/login',
     failureFlash: true
   })(req, res, next);
+});
+
+//GET logout
+router.get('/logout', (req, res) => {
+  req.logout();
+
+  req.flash('success', 'You are logged out');
+  res.redirect('/users/login');
+
 });
 
 module.exports = router;

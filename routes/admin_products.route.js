@@ -361,4 +361,5 @@ router.get('/delete-product/:id', isAdmin, function (req, res) {
         }
     });
 });
+
 module.exports = router;

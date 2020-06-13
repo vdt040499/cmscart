@@ -36,8 +36,17 @@
                         <% } %>    
                     )</a>
                 </li>
-                <li class="nav-item"><a class="nav-link" href="/users/register">Register</a></li>
-                <li class="nav-item"><a href="/users/login" class="nav-link">Login</a></li>
+
+                <% if (user) { %>
+                    <li class="nav-item"><a href="/users/logout" class="nav-link">Hi <%= user.name %>  (Logout)</a></li>
+                <% } else { %>
+                    <li class="nav-item"><a class="nav-link" href="/users/register">Register</a></li>
+                    <li class="nav-item"><a href="/users/login" class="nav-link">Login</a></li>
+                <% } %>
+
+                <% if (user && user.admin == 1) { %>
+                    <li class="nav-item"><a href="/admin/pages" class="nav-link">Admin area</a></li>
+                <% } %>
             </ul>
         </div>
     </nav>

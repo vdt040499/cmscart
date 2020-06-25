@@ -4,7 +4,6 @@ const router = express.Router();
 var Product = require('../models/product.model');
 
 //GET add product to cart
-
 router.get('/add/:product', (req, res) => {
     var slug = req.params.product;
 

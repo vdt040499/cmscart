@@ -63,7 +63,7 @@
     <% if (image != "thumbs") { %>
     <li>
         <img src="/product_images/<%= id %>/gallery/thumbs/<%= image %>" alt="">&nbsp;
-        <a class="confirmDeletion" href="/admin/products/delete-image/<%= image %>?id=<%= id %>">delete</a>
+        <a class="btn btn-md button confirmDeletion" href="/admin/products/delete-image/<%= image %>?id=<%= id %>">delete</a>
     </li>
     <% } %>
     <% }); %>
